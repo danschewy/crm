@@ -1,4 +1,4 @@
-import { isGoogleConfigured, signsInWithGoogle } from "@crm/auth";
+import { isGoogleMailboxConfigured, signsInWithGoogle } from "@crm/auth";
 import type { Db, Prisma } from "@crm/db";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { normalizeDomain } from "../companies/domain";
@@ -35,6 +35,10 @@ export class GoogleConnectionService {
 		private readonly stamp: ActivityStampService,
 	) {}
 
+	isMailboxEnabled(): boolean {
+		return isGoogleMailboxConfigured();
+	}
+
 	async status(userId: string): Promise<GoogleConnectionStatus> {
 		await this.onConnected(userId);
 
@@ -62,17 +66,24 @@ export class GoogleConnectionService {
 		});
 
 		return {
-			configured: isGoogleConfigured(),
+			configured: isGoogleMailboxConfigured(),
 			linked:
 				accounts.some((account) => account.providerId === GOOGLE_PROVIDER_ID) &&
 				sources.some((source) => source.connected),
-			required: signsInWithGoogle(accounts),
+			required: isGoogleMailboxConfigured() && signsInWithGoogle(accounts),
 			hasRefreshToken,
 			sources,
 		};
 	}
 
 	async onConnected(userId: string): Promise<void> {
+		if (!this.isMailboxEnabled()) {
+			await Promise.all(
+				GOOGLE_SYNC_SOURCES.map((source) => this.state.remove(userId, source)),
+			);
+			return;
+		}
+
 		const [granted, existing] = await Promise.all([
 			this.tokens.grantedScopes(userId, GOOGLE_PROVIDER_ID),
 			this.state.listForUser(userId, GOOGLE_SYNC_SOURCES),
@@ -99,6 +110,11 @@ export class GoogleConnectionService {
 	}
 
 	async reconcileAll(): Promise<void> {
+		if (!this.isMailboxEnabled()) {
+			await this.state.removeSources(GOOGLE_SYNC_SOURCES);
+			return;
+		}
+
 		const accounts = await this.db.account.findMany({
 			where: {
 				providerId: GOOGLE_PROVIDER_ID,

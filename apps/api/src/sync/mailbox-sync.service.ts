@@ -113,7 +113,10 @@ export class MailboxSyncService {
 	}
 
 	private async runOne(userId: string, source: string) {
-		if (isGoogleSyncSource(source)) return this.google.runOne(userId, source);
+		if (isGoogleSyncSource(source)) {
+			if (!this.googleConnections.isMailboxEnabled()) return null;
+			return this.google.runOne(userId, source);
+		}
 
 		if (isMicrosoftSyncSource(source)) {
 			return this.microsoft.runOne(userId, source);

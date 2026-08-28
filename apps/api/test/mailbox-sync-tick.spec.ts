@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import {
+	type Db,
 	GoogleSyncStatus,
 	type MailboxSyncModel as MailboxSync,
 } from "@crm/db";
-import type { GoogleConnectionService } from "../src/google/google-connection.service";
+import type { ActivityStampService } from "../src/crm/activity-stamp.service";
+import { GoogleConnectionService } from "../src/google/google-connection.service";
 import type { GoogleSyncService } from "../src/google/google-sync.service";
+import type { MailboxMatchService } from "../src/mailbox/mailbox-match.service";
+import type { MailboxTokenService } from "../src/mailbox/mailbox-token.service";
 import {
 	SYNC_LEASE_MS,
 	type SyncStateService,
@@ -21,6 +25,7 @@ type Outcome = {
 
 class FakeState {
 	readonly rows = new Map<string, MailboxSync>();
+	readonly removedSourceSets: string[][] = [];
 	private revision = 0;
 
 	add(id: string, source: string, overrides: Partial<MailboxSync> = {}): void {
@@ -91,6 +96,13 @@ class FakeState {
 		}
 	}
 
+	async removeSources(sources: readonly string[]): Promise<void> {
+		this.removedSourceSets.push([...sources]);
+		for (const [id, row] of this.rows) {
+			if (sources.includes(row.source)) this.rows.delete(id);
+		}
+	}
+
 	private isDue(row: MailboxSync, now: Date): boolean {
 		if (row.status === GoogleSyncStatus.NEEDS_RECONNECT) return false;
 
@@ -107,22 +119,26 @@ class FakeState {
 	}
 }
 
-const noConnections = {
-	reconcileAll: async () => undefined,
-};
-
 function build(
 	state: FakeState,
 	runOne: (userId: string, source: string) => Promise<Outcome | null>,
+	googleMailboxEnabled = true,
 ): MailboxSyncService {
 	const provider = { runOne } as unknown as GoogleSyncService;
+	const googleConnections = {
+		isMailboxEnabled: () => googleMailboxEnabled,
+		reconcileAll: async () => undefined,
+	};
+	const microsoftConnections = {
+		reconcileAll: async () => undefined,
+	};
 
 	return new MailboxSyncService(
 		state as unknown as SyncStateService,
 		provider,
 		provider as unknown as MicrosoftSyncService,
-		noConnections as unknown as GoogleConnectionService,
-		noConnections as unknown as MicrosoftConnectionService,
+		googleConnections as unknown as GoogleConnectionService,
+		microsoftConnections as unknown as MicrosoftConnectionService,
 	);
 }
 
@@ -130,6 +146,30 @@ let state: FakeState;
 
 beforeEach(() => {
 	state = new FakeState();
+});
+
+describe("identity-only Google mode", () => {
+	it("removes existing Google sync rows during reconciliation", async () => {
+		state.add("gmail", "gmail");
+		state.add("calendar", "calendar");
+		state.add("outlook", "outlook");
+
+		const identityGoogle = new GoogleConnectionService(
+			{} as Db,
+			{} as MailboxTokenService,
+			state as unknown as SyncStateService,
+			{} as MailboxMatchService,
+			{} as ActivityStampService,
+		);
+		identityGoogle.isMailboxEnabled = () => false;
+
+		await identityGoogle.reconcileAll();
+
+		expect(state.removedSourceSets).toEqual([["calendar", "gmail"]]);
+		expect([...state.rows.values()].map((row) => row.source)).toEqual([
+			"outlook",
+		]);
+	});
 });
 
 describe("runDue claims a mailbox before it syncs", () => {
@@ -201,6 +241,26 @@ describe("runDue claims a mailbox before it syncs", () => {
 });
 
 describe("runDue always resolves the lease", () => {
+	it("does not dispatch Google rows when mailbox access is disabled", async () => {
+		state.add("a", "gmail");
+
+		const calls: string[] = [];
+		const service = build(
+			state,
+			async (userId, source) => {
+				calls.push(`${userId}:${source}`);
+				return { source, userId, status: "synced" };
+			},
+			false,
+		);
+
+		const summary = await service.runDue();
+
+		expect(calls).toEqual([]);
+		expect(summary.attempted).toBe(1);
+		expect(summary.skipped).toBe(1);
+	});
+
 	it("releases a not-connected mailbox so the next tick still polls it", async () => {
 		state.add("a", "gmail");
 

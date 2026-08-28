@@ -1,6 +1,8 @@
+import { GOOGLE_AUTH_MODES, type GoogleAuthMode } from "@crm/auth/scopes";
 import { plainToInstance, Type } from "class-transformer";
 import {
 	IsEnum,
+	IsIn,
 	IsInt,
 	IsOptional,
 	IsString,
@@ -55,6 +57,10 @@ export class EnvironmentVariables {
 	@IsOptional()
 	@IsString()
 	GOOGLE_CLIENT_SECRET?: string;
+
+	@IsOptional()
+	@IsIn(GOOGLE_AUTH_MODES)
+	GOOGLE_AUTH_MODE?: GoogleAuthMode;
 
 	@IsOptional()
 	@IsString()

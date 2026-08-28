@@ -1,4 +1,10 @@
 import "@crm/env/load";
+import {
+	GOOGLE_PROVIDER_ID,
+	type MailboxProviderId,
+	MICROSOFT_PROVIDER_ID,
+	parseGoogleAuthMode,
+} from "./scopes";
 
 const DEFAULT_API_URL = "http://localhost:3001";
 const DEFAULT_APP_URL = "http://localhost:3000";
@@ -27,8 +33,20 @@ const pair = (
 };
 
 const googleCredentials = ():
-	| { clientId: string; clientSecret: string }
-	| undefined => pair("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET");
+	| {
+			clientId: string;
+			clientSecret: string;
+			authMode: ReturnType<typeof parseGoogleAuthMode>;
+	  }
+	| undefined => {
+	const credentials = pair("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET");
+	if (!credentials) return undefined;
+
+	return {
+		...credentials,
+		authMode: parseGoogleAuthMode(optional("GOOGLE_AUTH_MODE")),
+	};
+};
 
 const microsoftCredentials = ():
 	| { clientId: string; clientSecret: string; tenantId: string }
@@ -71,12 +89,23 @@ export function isGoogleConfigured(): boolean {
 	return env.google !== undefined;
 }
 
+export function isGoogleMailboxConfigured(): boolean {
+	return env.google?.authMode === "mailbox";
+}
+
 export function isMicrosoftConfigured(): boolean {
 	return env.microsoft !== undefined;
 }
 
 export function isSlackConfigured(): boolean {
 	return env.slack !== undefined;
+}
+
+export function configuredMailboxProviders(): MailboxProviderId[] {
+	const providers: MailboxProviderId[] = [];
+	if (isGoogleMailboxConfigured()) providers.push(GOOGLE_PROVIDER_ID);
+	if (isMicrosoftConfigured()) providers.push(MICROSOFT_PROVIDER_ID);
+	return providers;
 }
 
 export { apiUrl, appUrl };

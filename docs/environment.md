@@ -32,9 +32,11 @@ metadata. The root file's comment has the whole account.
 `DATABASE_URL`, `BETTER_AUTH_SECRET`, `ALLOWED_SIGN_IN`. Everything else has a
 localhost default or is genuinely optional.
 
-**`GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`** are the sign-in button *and* the
-Gmail/Calendar sync — optional, so an SSO-only install needn't create a Google project,
-but **set together or not at all** (`packages/auth/src/env.ts` throws on one).
+**`GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`** enable the Google sign-in button.
+They also enable Gmail and Calendar sync in the default `mailbox` mode. Set
+**`GOOGLE_AUTH_MODE=identity`** to request only `openid`, `email`, and `profile`.
+Identity mode never walls a Google user behind `/grant-access`, and Settings does not
+offer Google mailbox connection. Set the credentials together or not at all.
 
 **`MICROSOFT_CLIENT_ID` + `MICROSOFT_CLIENT_SECRET`** are the same bargain for Entra
 ID: the other sign-in button *and* the Outlook mail sync, one app registration, the
@@ -177,9 +179,8 @@ kept as an alias of the first, so an existing deployment's cron does not break o
 deploy. **Crons live in `apps/api/vercel.json`** — mailboxes `*/5 * * * *`, rates
 daily. Minute-level schedules need a Pro plan; on Hobby it silently becomes daily.
 
-Deliberate absences: **no `GOOGLE_SYNC_ENABLED`** (a switch that can disable a mandatory
-feature is only ever wrong), **no `GOOGLE_WORKSPACE_DOMAIN`** (`ALLOWED_SIGN_IN` already
-says who is internal — two sources is how a colleague becomes a lead), **no
+Deliberate absences: **no `GOOGLE_WORKSPACE_DOMAIN`** (`ALLOWED_SIGN_IN` already says
+who is internal — two sources is how a colleague becomes a lead), **no
 `GMAIL_BACKFILL_DAYS`**, **no `OUTLOOK_BACKFILL_DAYS`**, **no rate provider variable**.
 
 ## Telemetry is on, and turning it off is one variable

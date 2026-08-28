@@ -9,7 +9,9 @@ export { AUTH_COOKIE_PREFIX, SESSION_COOKIE_NAME } from "./cookies";
 export {
 	apiUrl,
 	appUrl,
+	configuredMailboxProviders,
 	isGoogleConfigured,
+	isGoogleMailboxConfigured,
 	isMicrosoftConfigured,
 	isSlackConfigured,
 } from "./env";
@@ -32,7 +34,10 @@ export {
 export {
 	CALENDAR_SCOPE,
 	GMAIL_SCOPE,
+	GOOGLE_AUTH_MODES,
 	GOOGLE_PROVIDER_ID,
+	type GoogleAuthMode,
+	googleProviderAccess,
 	hasSyncScopes,
 	IDENTITY_SCOPES,
 	isMailboxProvider,
@@ -43,6 +48,7 @@ export {
 	mailboxGrantsNeeded,
 	needsMailboxGrant,
 	OUTLOOK_MAIL_SCOPE,
+	parseGoogleAuthMode,
 	parseScopes,
 	REQUIRED_SCOPES,
 	type SignInAccount,

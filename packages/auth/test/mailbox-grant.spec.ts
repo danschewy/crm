@@ -1,8 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import {
+	googleProviderAccess,
+	IDENTITY_SCOPES,
 	MICROSOFT_SYNC_SCOPES,
 	mailboxGrantsNeeded,
 	needsMailboxGrant,
+	parseGoogleAuthMode,
 	SYNC_SCOPES,
 	signsInWithGoogle,
 	signsInWithMicrosoft,
@@ -12,6 +15,15 @@ const GRANTED = SYNC_SCOPES.join(",");
 const GRANTED_MICROSOFT = MICROSOFT_SYNC_SCOPES.join(",");
 
 describe("who has to grant a mailbox", () => {
+	it("does not wall an identity-only Google account", () => {
+		expect(
+			needsMailboxGrant(
+				[{ providerId: "google", scope: IDENTITY_SCOPES.join(",") }],
+				["microsoft"],
+			),
+		).toBe(false);
+	});
+
 	it("walls someone who signed in with Google and granted neither scope", () => {
 		expect(
 			needsMailboxGrant([{ providerId: "google", scope: "openid,email" }]),
@@ -83,6 +95,29 @@ describe("who has to grant a mailbox", () => {
 				{ providerId: "microsoft", scope: null },
 			]),
 		).toBe(false);
+	});
+});
+
+describe("Google provider access", () => {
+	it("defaults to mailbox access and rejects unknown modes", () => {
+		expect(parseGoogleAuthMode(undefined)).toBe("mailbox");
+		expect(parseGoogleAuthMode("identity")).toBe("identity");
+		expect(() => parseGoogleAuthMode("personal-data")).toThrow(
+			"GOOGLE_AUTH_MODE must be identity or mailbox.",
+		);
+	});
+
+	it("requests identity scopes without offline mailbox access", () => {
+		expect(googleProviderAccess("identity")).toEqual({
+			scope: [...IDENTITY_SCOPES],
+		});
+	});
+
+	it("preserves mailbox scopes and offline access by default", () => {
+		expect(googleProviderAccess("mailbox")).toEqual({
+			scope: [...SYNC_SCOPES],
+			accessType: "offline",
+		});
 	});
 });
 

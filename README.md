@@ -220,6 +220,7 @@ Open `.env` and set these. Everything else in the file is optional and commented
 | `BETTER_AUTH_SECRET`                       | `openssl rand -base64 32`                                             |
 | `ALLOWED_SIGN_IN`                          | Your email domain, e.g. `acme.com`. Or one address, e.g. `you@gmail.com`. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`| A Google OAuth client — 2 minutes, below. Both or neither.             |
+| `GOOGLE_AUTH_MODE`                         | `mailbox` by default, or `identity` for sign-in without Gmail or Calendar. |
 | `MICROSOFT_CLIENT_ID` / `MICROSOFT_CLIENT_SECRET` | A Microsoft Entra app registration — below. Both or neither. |
 
 **Pick at least one of Google and Microsoft**, or add your own identity provider on
@@ -234,11 +235,13 @@ you brought your own.
 
 1. [Google Cloud console](https://console.cloud.google.com/apis/credentials) → **Credentials** → **Create credentials** → **OAuth client ID** → **Web application**.
 2. Under **Authorised redirect URIs**, add `http://localhost:3001/api/auth/callback/google`.
-3. Enable the [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com) and the [Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) for the project.
-4. Copy the client ID and secret into `.env`.
+3. Enable the [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com) and the [Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) for the default `mailbox` mode.
+4. Set `GOOGLE_AUTH_MODE=identity` instead when Google must only authenticate users.
+5. Copy the client ID and secret into `.env`.
 
-Google is the sign-in method a clone starts with, and the same client reads Gmail and
-Calendar — so most installs want it. The API will nonetheless boot without it: an
+Google is the sign-in method a clone starts with. The same client reads Gmail and
+Calendar in `mailbox` mode. Identity mode requests only basic profile access. The API
+will nonetheless boot without Google: an
 install that signs in with Microsoft, or through its own identity provider added on
 **Settings → SSO**, leaves both empty and gets no Google button and no Gmail sync. Set
 them together or not at all; half a pair is a button that fails at Google. If your

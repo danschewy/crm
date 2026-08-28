@@ -11,6 +11,19 @@ export type MailboxProviderId = (typeof MAILBOX_PROVIDER_IDS)[number];
 
 export const IDENTITY_SCOPES = ["openid", "email", "profile"] as const;
 
+export const GOOGLE_AUTH_MODES = ["identity", "mailbox"] as const;
+
+export type GoogleAuthMode = (typeof GOOGLE_AUTH_MODES)[number];
+
+export function parseGoogleAuthMode(value: string | undefined): GoogleAuthMode {
+	if (!value) return "mailbox";
+	if ((GOOGLE_AUTH_MODES as readonly string[]).includes(value)) {
+		return value as GoogleAuthMode;
+	}
+
+	throw new Error("GOOGLE_AUTH_MODE must be identity or mailbox.");
+}
+
 export const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 export const CALENDAR_SCOPE =
 	"https://www.googleapis.com/auth/calendar.readonly";
@@ -25,6 +38,15 @@ export const SYNC_SCOPES_FOR = {
 } satisfies Record<MailboxProviderId, readonly string[]>;
 
 export const REQUIRED_SCOPES = [...IDENTITY_SCOPES, ...SYNC_SCOPES] as const;
+
+export function googleProviderAccess(mode: GoogleAuthMode): {
+	scope: string[];
+	accessType?: "offline";
+} {
+	return mode === "identity"
+		? { scope: [...IDENTITY_SCOPES] }
+		: { scope: [...SYNC_SCOPES], accessType: "offline" };
+}
 
 const GRAPH_SCOPE_PREFIX = "https://graph.microsoft.com/";
 
@@ -71,10 +93,16 @@ export function signsInWithMicrosoft(
 
 export function mailboxGrantsNeeded(
 	accounts: readonly SignInAccount[],
+	requiredProviders: readonly MailboxProviderId[] = MAILBOX_PROVIDER_IDS,
 ): MailboxProviderId[] {
+	const required = new Set(requiredProviders);
 	const everyRowIsAMailbox =
 		accounts.length > 0 &&
-		accounts.every((account) => isMailboxProvider(account.providerId));
+		accounts.every(
+			(account) =>
+				isMailboxProvider(account.providerId) &&
+				required.has(account.providerId),
+		);
 
 	if (!everyRowIsAMailbox) return [];
 
@@ -85,13 +113,19 @@ export function mailboxGrantsNeeded(
 
 	return [
 		...new Set(
-			accounts.map((account) => account.providerId).filter(isMailboxProvider),
+			accounts
+				.map((account) => account.providerId)
+				.filter(isMailboxProvider)
+				.filter((providerId) => required.has(providerId)),
 		),
 	];
 }
 
-export function needsMailboxGrant(accounts: readonly SignInAccount[]): boolean {
-	return mailboxGrantsNeeded(accounts).length > 0;
+export function needsMailboxGrant(
+	accounts: readonly SignInAccount[],
+	requiredProviders: readonly MailboxProviderId[] = MAILBOX_PROVIDER_IDS,
+): boolean {
+	return mailboxGrantsNeeded(accounts, requiredProviders).length > 0;
 }
 
 export function parseScopes(scope: string | null | undefined): Set<string> {

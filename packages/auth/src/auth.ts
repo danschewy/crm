@@ -13,10 +13,10 @@ import { env } from "./env";
 import { ensureWorkspaceMembership } from "./organization";
 import {
 	GOOGLE_PROVIDER_ID,
+	googleProviderAccess,
 	MICROSOFT_PROVIDER_ID,
 	MICROSOFT_SYNC_SCOPES,
 	SLACK_PROVIDER_ID,
-	SYNC_SCOPES,
 } from "./scopes";
 import { notifySignedIn } from "./signed-in";
 import { slackConnectGuard } from "./slack-connect";
@@ -37,12 +37,10 @@ const slackRedirectUri = new URL(
 ).toString();
 
 if (env.google) {
+	const { authMode, ...credentials } = env.google;
 	const google: NonNullable<typeof socialProviders.google> = {
-		...env.google,
-
-		scope: [...SYNC_SCOPES],
-
-		accessType: "offline",
+		...credentials,
+		...googleProviderAccess(authMode),
 	};
 
 	const hostedDomain = primaryWorkspaceDomain();

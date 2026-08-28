@@ -1,4 +1,8 @@
-import { type MailboxProviderId, mailboxGrantsNeeded } from "@crm/auth";
+import {
+	configuredMailboxProviders,
+	type MailboxProviderId,
+	mailboxGrantsNeeded,
+} from "@crm/auth";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthHeading, AuthShell } from "@/components/auth-shell";
@@ -24,7 +28,10 @@ const BOTH =
 export default async function GrantAccessPage() {
 	const { user } = await requireSession();
 
-	const providers = mailboxGrantsNeeded(await signInAccounts(user.id));
+	const providers = mailboxGrantsNeeded(
+		await signInAccounts(user.id),
+		configuredMailboxProviders(),
+	);
 
 	if (providers.length === 0) {
 		redirect("/");

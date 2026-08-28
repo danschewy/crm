@@ -171,6 +171,12 @@ export class SyncStateService {
 
 		await this.db.mailboxSync.deleteMany({ where });
 	}
+
+	async removeSources(sources: readonly SyncSource[]): Promise<void> {
+		await this.db.mailboxSync.deleteMany({
+			where: { source: { in: [...sources] } },
+		});
+	}
 }
 
 function dueWhere(now: Date) {

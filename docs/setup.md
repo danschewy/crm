@@ -26,7 +26,8 @@ is an edited migration that has already been applied.
 
 ## Google Cloud
 
-- **Enable the Gmail API and the Google Calendar API** on the project.
+- **Enable the Gmail API and the Google Calendar API** in `mailbox` mode.
+- **Leave both APIs disabled** when `GOOGLE_AUTH_MODE=identity`.
 - **Set the consent screen to User type: Internal** if you are on Workspace.
   `gmail.readonly` is a *restricted* scope, so an External app needs OAuth
   verification plus an annual CASA assessment. Going External later means the full
