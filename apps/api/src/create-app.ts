@@ -18,6 +18,40 @@ import { ContextLogger } from "./logging/context-logger";
 import { REST_BRIDGE_PATH } from "./trpc/openapi";
 import { createBaseTrpcContext } from "./trpc/trpc.context";
 
+const DOCUMENTATION_PATHS = new Set(["/", "/index.html", "/openapi.json"]);
+
+function isDocumentationPath(path: string): boolean {
+	const normalizedPath = (
+		path === "/" ? path : path.replace(/\/+$/, "")
+	).toLowerCase();
+
+	return (
+		DOCUMENTATION_PATHS.has(normalizedPath) ||
+		normalizedPath.startsWith("/swagger-ui") ||
+		normalizedPath.startsWith("/favicon-")
+	);
+}
+
+async function requireDocumentationSession(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	if (!isDocumentationPath(req.path)) {
+		next();
+		return;
+	}
+
+	const { session } = await createBaseTrpcContext(req);
+
+	if (!session?.user) {
+		res.status(401).json({ message: "Unauthorized" });
+		return;
+	}
+
+	next();
+}
+
 export async function createApp(): Promise<NestExpressApplication> {
 	const app = await NestFactory.create<NestExpressApplication>(
 		AppModule,
@@ -26,6 +60,7 @@ export async function createApp(): Promise<NestExpressApplication> {
 	);
 
 	app.use(helmet());
+	app.use(requireDocumentationSession);
 	app.useGlobalPipes(
 		new ValidationPipe({
 			whitelist: true,

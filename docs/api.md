@@ -145,6 +145,8 @@ self-hoster's admin cannot redeploy.
 
 `GET /openapi.json` serves one document: Nest's own controllers plus a REST bridge
 under `/rest` generated from every tRPC procedure. Swagger UI renders it at `/`.
+Both documentation routes require a signed-in session or an API key. Anonymous
+requests receive `401`; the underlying routes keep their own authentication rules.
 `createApp` builds both halves and merges them, so nothing is generated at build
 time and no file is checked in — the document is whatever the routers are.
 
