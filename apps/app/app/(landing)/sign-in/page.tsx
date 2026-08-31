@@ -2,7 +2,7 @@ import type { MailboxProviderId } from "@crm/auth/scopes";
 import type { Metadata } from "next";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
-import kenCowanPortrait from "@/assets/ken-cowan.webp";
+import houstonSkyline from "@/assets/houston-skyline.webp";
 import { AuthHeading, AuthShell } from "@/components/auth-shell";
 import { getSession } from "@/lib/session";
 import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";
@@ -43,7 +43,7 @@ async function currentSession() {
 
 export default function SignInPage({ searchParams }: PageProps<"/sign-in">) {
 	return (
-		<AuthShell portrait={kenCowanPortrait}>
+		<AuthShell heroAlt="Houston skyline at night" heroImage={houstonSkyline}>
 			<Suspense
 				fallback={
 					<AuthHeading

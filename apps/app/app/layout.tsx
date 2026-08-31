@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 	description: "Customer Relationship Management for Comp AI",
 	icons: {
 		icon: [
-			{ url: "/favicon.svg", type: "image/svg+xml" },
+			{ url: "/favicon.ico", type: "image/x-icon", sizes: "64x64" },
 			{ url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
 		],
 		apple: "/apple-touch-icon.png",

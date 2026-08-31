@@ -1,4 +1,4 @@
-import { ThemeLogo } from "@crm/ui/components/theme-logo";
+import { BrandLogo } from "@crm/ui/components/brand-logo";
 import { cn } from "@crm/ui/lib/utils";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
@@ -6,32 +6,42 @@ import type { ReactNode } from "react";
 import satacaMark from "@/assets/sataca-mark.webp";
 import { AuthShader } from "@/components/auth-shader";
 
-export function AuthShell({
-	children,
-	portrait,
-}: {
-	children: ReactNode;
-	portrait?: StaticImageData;
-}) {
+type AuthShellProps = { children: ReactNode } & (
+	| { heroAlt: string; heroImage: StaticImageData }
+	| { heroAlt?: never; heroImage?: never }
+);
+
+export function AuthShell({ children, heroAlt, heroImage }: AuthShellProps) {
 	return (
 		<main
 			className={cn(
 				"grid min-h-svh bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]",
-				portrait ? "brand" : "dark",
+				heroImage ? "brand" : "dark",
 			)}
 		>
-			<section className="relative hidden min-h-svh overflow-hidden bg-muted p-8 lg:flex lg:flex-col lg:justify-between xl:p-12">
-				{portrait ? (
+			<section
+				className={cn(
+					"relative hidden min-h-svh overflow-hidden p-8 lg:flex lg:flex-col lg:justify-between xl:p-12",
+					heroImage ? "bg-transparent" : "bg-muted",
+				)}
+			>
+				{heroImage ? (
 					<>
 						<Image
-							alt="Ken Cowan"
-							className="object-cover object-top"
+							alt={heroAlt}
+							className="object-cover"
 							fill
 							priority
 							sizes="(min-width: 1024px) calc(100vw - 520px), 0px"
-							src={portrait}
+							src={heroImage}
 						/>
-						<div className="absolute inset-0 bg-linear-to-t from-background via-background/25 to-background/10" />
+						<div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/60 to-background/20" />
+						<div className="absolute inset-0 grid grid-cols-2">
+							<span />
+							<div className="flex items-center justify-center opacity-75">
+								<BrandLogo brandMark={satacaMark} size="hero" />
+							</div>
+						</div>
 					</>
 				) : (
 					<AuthShader />
@@ -39,7 +49,7 @@ export function AuthShell({
 
 				<div className="relative flex gap-2 text-sm/5">
 					<Link href="/" aria-label="Homepage" className="flex">
-						<ThemeLogo brandMark={satacaMark} />
+						<BrandLogo brandMark={satacaMark} />
 					</Link>
 				</div>
 
@@ -69,7 +79,7 @@ export function AuthShell({
 
 			<section className="flex min-h-svh flex-col bg-background px-6 py-8 sm:px-10 lg:px-14">
 				<div className="flex gap-2 text-sm/5 max-lg:hidden lg:invisible">
-					<ThemeLogo brandMark={satacaMark} />
+					<BrandLogo brandMark={satacaMark} />
 				</div>
 
 				<div className="flex flex-1 items-center justify-center py-12">
@@ -90,7 +100,7 @@ export function AuthHeading({
 	return (
 		<div className="flex flex-col gap-3 text-left">
 			<Link href="/" aria-label="Homepage" className="flex">
-				<ThemeLogo brandMark={satacaMark} size="default" />
+				<BrandLogo brandMark={satacaMark} size="default" />
 			</Link>
 			<div className="flex flex-col gap-1">
 				<h2 className="text-2xl/8 font-semibold tracking-tight text-balance">

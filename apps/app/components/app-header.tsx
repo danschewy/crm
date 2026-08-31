@@ -7,6 +7,7 @@ import Logout from "@carbon/icons-react/es/Logout";
 import Menu from "@carbon/icons-react/es/Menu";
 import UserAvatar from "@carbon/icons-react/es/UserAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@crm/ui/components/avatar";
+import { BrandLogo } from "@crm/ui/components/brand-logo";
 import { Button } from "@crm/ui/components/button";
 import {
 	DropdownMenu,
@@ -20,7 +21,6 @@ import {
 } from "@crm/ui/components/dropdown-menu";
 import { Separator } from "@crm/ui/components/separator";
 import { Skeleton } from "@crm/ui/components/skeleton";
-import { ThemeLogo } from "@crm/ui/components/theme-logo";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -66,7 +66,7 @@ export function AppHeader({ user }: { user: User }) {
 					aria-label="Homepage"
 					className="hidden size-8 items-center justify-center text-foreground md:flex"
 				>
-					<ThemeLogo brandMark={satacaMark} />
+					<BrandLogo brandMark={satacaMark} />
 				</Link>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<span className="min-w-0 truncate font-medium text-sm">{label}</span>
@@ -95,7 +95,7 @@ export function AppHeaderFallback() {
 		>
 			<div className="flex shrink-0 items-center gap-1">
 				<span className="hidden size-8 items-center justify-center text-foreground md:flex">
-					<ThemeLogo brandMark={satacaMark} />
+					<BrandLogo brandMark={satacaMark} />
 				</span>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<Skeleton className="h-4 w-24" />
