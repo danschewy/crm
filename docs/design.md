@@ -29,3 +29,9 @@ colour that changes per theme is not one colour, it is two, and both then need
 maintaining. The single exception is `--ring`, which lightens in dark: a fill
 carries the brand, but a ring only has to be seen, and `#006B4F` is too close to
 the dark background to register.
+
+### SATACA brand theme
+
+The optional `brand` theme is an intentional exception to the light and dark
+palette rules. It uses SATACA navy, teal, tinted neutrals, and an engineering
+grid. The original light and dark tokens remain unchanged.

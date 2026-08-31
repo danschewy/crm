@@ -3,7 +3,7 @@ import { Toaster } from "@crm/ui/components/sonner";
 import { TooltipProvider } from "@crm/ui/components/tooltip";
 import { cn } from "@crm/ui/lib/utils";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { LocalDateTimeHydrator } from "@/components/local-date-time";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -16,6 +16,11 @@ const fontSans = Geist({
 
 const fontMono = Geist_Mono({
 	variable: "--font-geist-mono",
+	subsets: ["latin"],
+});
+
+const fontBrand = Inter({
+	variable: "--font-brand",
 	subsets: ["latin"],
 });
 
@@ -44,7 +49,12 @@ export default function RootLayout({
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className={cn(fontSans.variable, fontMono.variable, "h-full antialiased")}
+			className={cn(
+				fontSans.variable,
+				fontMono.variable,
+				fontBrand.variable,
+				"h-full antialiased",
+			)}
 		>
 			<body className="flex min-h-full flex-col font-sans">
 				<NuqsAdapter>

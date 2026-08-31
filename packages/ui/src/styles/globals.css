@@ -4,7 +4,7 @@
 
 @source "../../**/*.{ts,tsx}";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .brand *));
 
 :root {
 	--background: #ffffff;
@@ -148,6 +148,50 @@
 	--shadow-2xl: 0px 16px 32px -8px hsl(0 0% 0% / 0.12);
 }
 
+.brand {
+	color-scheme: dark;
+	--background: #131d2a;
+	--foreground: #f5f7fa;
+	--card: #182536;
+	--card-foreground: #f5f7fa;
+	--popover: #182536;
+	--popover-foreground: #f5f7fa;
+	--primary: #3b9188;
+	--primary-foreground: #131d2a;
+	--secondary: #203146;
+	--secondary-foreground: #f5f7fa;
+	--muted: #203146;
+	--muted-foreground: #aab5c2;
+	--accent: #26384c;
+	--accent-foreground: #f5f7fa;
+	--tag: #26384c;
+	--tag-foreground: #f5f7fa;
+	--border: #2b4355;
+	--input: #2b4355;
+	--overlay: rgb(5 12 20 / 0.68);
+	--ring: #5cbcb3;
+	--chart-1: #5cbcb3;
+	--chart-2: #76a7cc;
+	--chart-3: #d5a95f;
+	--chart-4: #8b91c9;
+	--chart-5: #71b28d;
+	--code-foreground: #e7edf3;
+	--code-accent: #e38b73;
+	--code-string: #5cbcb3;
+	--sidebar: #111b27;
+	--sidebar-foreground: #f5f7fa;
+	--sidebar-primary: #3b9188;
+	--sidebar-primary-foreground: #131d2a;
+	--sidebar-accent: #26384c;
+	--sidebar-accent-foreground: #f5f7fa;
+	--sidebar-border: #2b4355;
+	--sidebar-ring: #5cbcb3;
+	--font-sans: var(--font-brand, "Inter", sans-serif);
+	--font-heading: var(--font-brand, "Inter", sans-serif);
+	--background-grid-color: rgb(92 188 179 / 0.035);
+	--background-grid-size: 40px;
+}
+
 @theme inline {
 	--spacing-page-top: 40px;
 	--spacing-page-bottom: 40px;
@@ -244,6 +288,15 @@
 	}
 	body {
 		@apply bg-background text-foreground font-sans;
+	}
+	.brand,
+	.brand body,
+	body.brand {
+		background-color: var(--background);
+		background-image:
+			linear-gradient(var(--background-grid-color) 1px, transparent 1px),
+			linear-gradient(90deg, var(--background-grid-color) 1px, transparent 1px);
+		background-size: var(--background-grid-size) var(--background-grid-size);
 	}
 
 	* {

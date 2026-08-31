@@ -1,6 +1,7 @@
 "use client";
 
 import Asleep from "@carbon/icons-react/es/Asleep";
+import ColorPalette from "@carbon/icons-react/es/ColorPalette";
 import Light from "@carbon/icons-react/es/Light";
 import Logout from "@carbon/icons-react/es/Logout";
 import Menu from "@carbon/icons-react/es/Menu";
@@ -12,24 +13,34 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@crm/ui/components/dropdown-menu";
-import Logo from "@crm/ui/components/logo";
 import { Separator } from "@crm/ui/components/separator";
 import { Skeleton } from "@crm/ui/components/skeleton";
+import { ThemeLogo } from "@crm/ui/components/theme-logo";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
+import satacaMark from "@/assets/sataca-mark.webp";
 import { EnrichmentQueue } from "@/components/enrichment-queue";
 import { useMobileNav } from "@/components/mobile-nav";
 import { signOutAndRedirect } from "@/lib/sign-out";
+import { THEME_CHOICES, visibleTheme } from "@/lib/theme-options";
 import { useTRPC } from "@/lib/trpc/client";
 import { useWorkspaceUrl } from "@/lib/use-workspace-url";
 import { workspaceLabel } from "@/lib/workspace-label";
 
 type User = { name: string; email: string; image: string | null };
+
+const THEME_ICONS = {
+	brand: ColorPalette,
+	light: Light,
+	dark: Asleep,
+};
 
 export function AppHeader({ user }: { user: User }) {
 	const { setOpen: setMobileNavOpen } = useMobileNav();
@@ -55,7 +66,7 @@ export function AppHeader({ user }: { user: User }) {
 					aria-label="Homepage"
 					className="hidden size-8 items-center justify-center text-foreground md:flex"
 				>
-					<Logo className="size-5" />
+					<ThemeLogo brandMark={satacaMark} />
 				</Link>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<span className="min-w-0 truncate font-medium text-sm">{label}</span>
@@ -84,7 +95,7 @@ export function AppHeaderFallback() {
 		>
 			<div className="flex shrink-0 items-center gap-1">
 				<span className="hidden size-8 items-center justify-center text-foreground md:flex">
-					<Logo className="size-5" />
+					<ThemeLogo brandMark={satacaMark} />
 				</span>
 				<Separator orientation="vertical" className="mx-1 h-5 bg-transparent" />
 				<Skeleton className="h-4 w-24" />
@@ -103,8 +114,8 @@ export function AppHeaderFallback() {
 }
 
 function UserMenu({ user, onSignOut }: { user: User; onSignOut: () => void }) {
-	const { resolvedTheme, setTheme } = useTheme();
-	const isDark = resolvedTheme === "dark";
+	const { resolvedTheme, setTheme, theme } = useTheme();
+	const selectedTheme = visibleTheme(theme, resolvedTheme);
 
 	return (
 		<DropdownMenu>
@@ -129,15 +140,17 @@ function UserMenu({ user, onSignOut }: { user: User; onSignOut: () => void }) {
 					<span className="min-w-0 truncate">{user.email}</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem
-					onSelect={(event) => {
-						event.preventDefault();
-						setTheme(isDark ? "light" : "dark");
-					}}
-				>
-					{isDark ? <Light /> : <Asleep />}
-					{isDark ? "Light mode" : "Dark mode"}
-				</DropdownMenuItem>
+				<DropdownMenuRadioGroup value={selectedTheme} onValueChange={setTheme}>
+					{THEME_CHOICES.map(({ value, label }) => {
+						const Icon = THEME_ICONS[value];
+						return (
+							<DropdownMenuRadioItem key={value} value={value}>
+								<Icon />
+								{label}
+							</DropdownMenuRadioItem>
+						);
+					})}
+				</DropdownMenuRadioGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={onSignOut}>
 					<Logout />

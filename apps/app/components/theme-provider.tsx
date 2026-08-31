@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
+import { THEME_OPTIONS } from "@/lib/theme-options";
 
 export function ThemeProvider({
 	children,
@@ -10,9 +11,10 @@ export function ThemeProvider({
 	return (
 		<NextThemesProvider
 			attribute="class"
-			defaultTheme="system"
+			defaultTheme="brand"
 			enableSystem
 			disableTransitionOnChange
+			themes={[...THEME_OPTIONS]}
 			{...props}
 		>
 			{children}
