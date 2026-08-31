@@ -26,10 +26,10 @@ const fontBrand = Inter({
 
 export const metadata: Metadata = {
 	title: {
-		default: "Comp AI - CRM",
-		template: "%s · Comp AI CRM",
+		default: "SATACA CRM",
+		template: "%s · SATACA CRM",
 	},
-	description: "Customer Relationship Management for Comp AI",
+	description: "Customer Relationship Management for SATACA",
 	icons: {
 		icon: [
 			{ url: "/favicon.ico", type: "image/x-icon", sizes: "64x64" },
